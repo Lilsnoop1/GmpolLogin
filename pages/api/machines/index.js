@@ -16,7 +16,7 @@ const s3 = new S3Client({
 const allowedOrigins = ['http://localhost:5173', 'https://gmpol.com'];
 
 export default async function handler(req, res) {
-  
+  const origin = req.headers.origin;
   if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }
