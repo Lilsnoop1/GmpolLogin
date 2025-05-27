@@ -2,7 +2,10 @@
 import { db } from '../../../../lib/firebaseAdmin';
 
 
-const allowedOrigins = ['http://localhost:5173', 'https://gmpol.com'];
+const allowedOrigins = ['http://localhost:5173', 'https://gmpol.com','https://www.gmpol.com',
+  'https://www.globalmedicalpartsonline.com',
+  'https://globalmedicalpartsonline.com'
+];
 export default async function handler(req, res) {
   const origin = req.headers.origin;
 

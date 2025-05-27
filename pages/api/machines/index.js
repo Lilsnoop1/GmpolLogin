@@ -13,7 +13,10 @@ const s3 = new S3Client({
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
   },
 });
-const allowedOrigins = ['http://localhost:5173', 'https://gmpol.com'];
+const allowedOrigins = ['http://localhost:5173', 'https://gmpol.com','https://www.gmpol.com',
+  'https://www.globalmedicalpartsonline.com',
+  'https://globalmedicalpartsonline.com'
+];
 
 export default async function handler(req, res) {
   const origin = req.headers.origin;
