@@ -1,0 +1,32 @@
+{
+  "name": "gmpol-login-portal",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.816.0",
+    "axios": "^1.6.2",
+    "dotenv": "^16.5.0",
+    "firebase": "^10.7.0",
+    "firebase-admin": "^11.11.1",
+    "formidable": "^3.5.1",
+    "lucide-react": "^0.511.0",
+    "next": "14.0.3",
+    "next-auth": "^4.24.5",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-hot-toast": "^2.4.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.5",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "typescript": "5.8.3"
+  }
+}
