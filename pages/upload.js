@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { PlusIcon, TrashIcon, XIcon, UploadIcon } from 'lucide-react';
+import toast from 'react-hot-toast';
 
-const UploadForm = ({ isOpen, onClose, type}) => {
+const UploadForm = ({ isOpen, onClose, type, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -9,6 +10,8 @@ const UploadForm = ({ isOpen, onClose, type}) => {
     specifications: [{ name: '', value: '', isNested: false, subSpecs: [] }]
   });
   const [selectedFile, setSelectedFile] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef(null);
 
   const handleFeatureChange = (index, field, value) => {
     const newFeatures = [...formData.features];
@@ -75,8 +78,8 @@ const UploadForm = ({ isOpen, onClose, type}) => {
     setFormData({ ...formData, specifications: newSpecs });
   };
 
-  const handleFileSelect = (e) => {
-    const file = e.target.files[0];
+  const handleFileSelect = (event) => {
+    const file = event.target.files[0];
     if (file) {
       setSelectedFile(file);
     }
@@ -84,46 +87,21 @@ const UploadForm = ({ isOpen, onClose, type}) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
     if (!selectedFile) {
-      alert('Please select a file first');
+      toast.error('Please select a file first');
       return;
     }
 
-    // Format the data according to your requirements
-    const formattedData = {
-      name: formData.name,
-      description: formData.description,
-      features: formData.features.reduce((acc, { name, feature }) => {
-        if (name && feature) { // Only include if both fields are filled
-          acc[name] = feature;
-        }
-        return acc;
-      }, {}),
-      specifications: formData.specifications.reduce((acc, spec) => {
-        if (spec.name) { // Only include if name is filled
-          if (spec.isNested) {
-            acc[spec.name] = spec.subSpecs.reduce((subAcc, { name, value }) => {
-              if (name && value) { // Only include if both fields are filled
-                subAcc[name] = value;
-              }
-              return subAcc;
-            }, {});
-          } else if (spec.value) { // Only include if value is filled
-            acc[spec.name] = spec.value;
-          }
-        }
-        return acc;
-      }, {})
-    };
+    setIsSubmitting(true);
+    const loadingToast = toast.loading('Uploading...');
 
     try {
       // First upload the file
       const formDataFile = new FormData();
       formDataFile.append('file', selectedFile);
 
-      if(type=='machine'){
-          const fileResponse = await fetch('/api/machines/upload', {
+      if (type === 'machine') {
+        const fileResponse = await fetch('/api/machines/upload', {
           method: 'POST',
           body: formDataFile,
         });
@@ -132,20 +110,38 @@ const UploadForm = ({ isOpen, onClose, type}) => {
         }
         const { url } = await fileResponse.json();
         // Then upload the description with the file URL
-      const response = await fetch('/api/machines/descriptions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formattedData,
-          url,
-          type // Add type to distinguish between instruments and machines
-        }),
-      });
+        const response = await fetch('/api/machines/descriptions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            ...formData,
+            url,
+            type // Add type to distinguish between instruments and machines
+          }),
+        });
 
-      if (!response.ok) {
-        throw new Error('Failed to upload description');
+        if (!response.ok) {
+          throw new Error('Failed to upload description');
+        }
+
+        toast.success('Upload successful!', {
+          id: loadingToast,
+        });
+      } else if (type === 'instrument') {
+        formDataFile.append('name', formData.name);
+        const fileResponse = await fetch('/api/instruments/upload', {
+          method: 'POST',
+          body: formDataFile,
+        });
+        if (!fileResponse.ok) {
+          throw new Error('Failed to upload file');
+        }
+        setSelectedFile(null);
+        toast.success('Upload successful!', {
+          id: loadingToast,
+        });
       }
 
       // Reset form after successful upload
@@ -155,25 +151,22 @@ const UploadForm = ({ isOpen, onClose, type}) => {
         features: [{ name: '', feature: '' }],
         specifications: [{ name: '', value: '', isNested: false, subSpecs: [] }]
       });
-      setSelectedFile(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       onClose();
-      alert('Upload successful!');
-     }else if(type=='instrument'){
-        formDataFile.append('name', formattedData.name);
-        const fileResponse = await fetch('/api/instruments/upload', {
-          method: 'POST',
-          body: formDataFile,
-        });
-        if (!fileResponse.ok) {
-          throw new Error('Failed to upload file');
-        }
-        setSelectedFile(null);
-      onClose();
-      alert('Upload successful!');
-     }
+      
+      // Call the onSuccess callback to refresh the parent component's data
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
       console.error('Upload error:', error);
-      alert('Failed to upload. Please try again.');
+      toast.error(error.message || 'An error occurred', {
+        id: loadingToast,
+      });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -202,6 +195,7 @@ const UploadForm = ({ isOpen, onClose, type}) => {
                 onChange={handleFileSelect}
                 className="hidden"
                 accept="image/*"
+                ref={fileInputRef}
               />
               <label
                 htmlFor="file-upload"
@@ -416,9 +410,12 @@ const UploadForm = ({ isOpen, onClose, type}) => {
               </button>
               <button
                 type="submit"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                disabled={isSubmitting}
+                className={`px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                  isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
               >
-                Upload
+                {isSubmitting ? 'Uploading...' : 'Upload'}
               </button>
             </div>
           </form>

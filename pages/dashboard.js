@@ -270,6 +270,13 @@ export default function Dashboard() {
             isOpen={isUploadModalOpen}
             onClose={() => setIsUploadModalOpen(false)}
             type={activeTab === 'instruments' ? 'instrument' : 'machine'}
+            onSuccess={() => {
+              if (activeTab === 'instruments') {
+                fetchInstruments();
+              } else {
+                fetchMachines();
+              }
+            }}
           />
 
           {/* Grid of Items */}
