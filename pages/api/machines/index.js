@@ -13,9 +13,13 @@ const s3 = new S3Client({
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
   },
 });
+const allowedOrigins = ['http://localhost:5173', 'https://gmpol.com'];
 
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 

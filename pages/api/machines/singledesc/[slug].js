@@ -1,10 +1,16 @@
 // pages/api/machines/description/[slug].ts
 import { db } from '../../../../lib/firebaseAdmin';
 
+
+const allowedOrigins = ['http://localhost:5173', 'https://gmpol.com'];
 export default async function handler(req, res) {
-  console.log('API file loaded');
-   res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', 'http://localhost:5173');
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader(
     'Access-Control-Allow-Headers',

@@ -10,10 +10,15 @@ const s3 = new S3Client({
   },
 });
 
+const allowedOrigins = ['http://localhost:5173', 'https://gmpol.com'];
+
 export default async function handler(req, res) {
 
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
