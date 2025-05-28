@@ -22,6 +22,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
   try {
     const form = formidable();
     const [fields, files] = await new Promise((resolve, reject) => {
@@ -38,12 +39,16 @@ export default async function handler(req, res) {
 
     const fileContent = fs.readFileSync(file.filepath);
 
+    // Format the filename: lowercase and replace spaces with underscores
+    const sanitizedFilename = file.originalFilename
+      .toLowerCase()
+      .replace(/\s+/g, '_');
+
     const command = new PutObjectCommand({
       Bucket: 'machines',
-      Key: file.originalFilename,
+      Key: sanitizedFilename,
       Body: fileContent,
       ContentType: file.mimetype,
-      // Metadata removed
     });
 
     await s3.send(command);
@@ -51,8 +56,8 @@ export default async function handler(req, res) {
     fs.unlinkSync(file.filepath);
 
     res.status(200).json({
-      name: file.originalFilename,
-      url: `${process.env.R2_ENDPOINT}/machines/${file.originalFilename}`,
+      name: sanitizedFilename,
+      url: `${process.env.R2_ENDPOINT}/machines/${sanitizedFilename}`,
     });
   } catch (err) {
     console.error(err);
