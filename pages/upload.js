@@ -79,11 +79,17 @@ const UploadForm = ({ isOpen, onClose, type, onSuccess }) => {
   };
 
   const handleFileSelect = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setSelectedFile(file);
-    }
-  };
+  const file = event.target.files[0];
+  if (file) {
+    setSelectedFile(file);
+
+    const extension = file.name.split('.').pop(); // get the extension
+    setFormData(prev => ({
+      ...prev,
+      extension: extension // add it to the form data
+    }));
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
