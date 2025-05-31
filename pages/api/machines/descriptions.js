@@ -1,12 +1,14 @@
 import { db } from '../../../lib/firebaseAdmin';
 
-const allowedOrigins = ['http://localhost:5173', 'https://gmpol.com','https://www.gmpol.com',
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://gmpol.com',
+  'https://www.gmpol.com',
   'https://www.globalmedicalpartsonline.com',
-  'https://globalmedicalpartsonline.com'
+  'https://globalmedicalpartsonline.com',
 ];
 
 export default async function handler(req, res) {
-  // Set CORS headers
   const origin = req.headers.origin;
 
   if (allowedOrigins.includes(origin)) {
@@ -20,8 +22,6 @@ export default async function handler(req, res) {
     'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
   );
 
-
-  // Handle OPTIONS request
   if (req.method === 'OPTIONS') {
     res.status(200).end();
     return;
@@ -32,8 +32,9 @@ export default async function handler(req, res) {
       const snapshot = await db.collection('machines').get();
       const machines = snapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data()
+        ...doc.data(),
       }));
+      console.log({machines});
       res.status(200).json({ machines });
     } catch (error) {
       console.error('Error fetching machines:', error);
@@ -47,18 +48,23 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Name and description are required' });
       }
 
+      const slug = encodeURIComponent(name.toLowerCase().replace(/\s+/g, '_'));
+
       const docRef = await db.collection('machines').add({
         name,
-        description,
-        features,
-        specifications,
+        slug,
+        metadata: {
+          description,
+          features,
+          specifications,
+        },
         url,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
       });
 
-      res.status(200).json({ 
+      res.status(200).json({
         message: 'Machine added successfully',
-        id: docRef.id 
+        id: docRef.id,
       });
     } catch (error) {
       console.error('Error adding machine:', error);
