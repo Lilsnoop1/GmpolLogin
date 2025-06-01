@@ -4,6 +4,7 @@ import { ArrowLeftIcon, TruckIcon, ScaleIcon, RulerIcon, InfoIcon } from 'lucide
 
 const machineurl = "https://pub-4aaf0de1afcc494fb5f9a408ec4711b7.r2.dev";
 const instrumenturl = "https://pub-bad3ff0b003e4cfa9d266bdf59521d9b.r2.dev";
+const partsurl = "https://pub-f431682a7c9f419e9dbc31ec037e5d34.r2.dev";
 
 export default function Details() {
   const router = useRouter();
@@ -102,6 +103,29 @@ export default function Details() {
       </div>
     </div>
   );
+  const renderPartDetails = () => (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="bg-gray-100 rounded-lg overflow-hidden">
+        <img
+          src={`${partsurl}/${encodeURIComponent(name)}`}
+          alt={name.replace(/\.[^/.]+$/, '')}
+          className="w-full h-auto object-cover"
+          loading="lazy"
+        />
+      </div>
+
+      <div>
+        <div className="mb-6">
+          <span className="inline-block bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded mb-2">
+            Part
+          </span>
+          <h1 className="text-3xl font-bold text-gray-900">
+            {name.replace(/\.[^/.]+$/, '')}
+          </h1>
+        </div>
+      </div>
+    </div>
+  );
 
   const renderMachineDetails = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -192,7 +216,7 @@ export default function Details() {
           </button>
         </div>
 
-        {type === 'instruments' ? renderInstrumentDetails() : renderMachineDetails()}
+        {type === 'instruments' ? renderInstrumentDetails() : type==="parts"? renderPartDetails() : renderMachineDetails()}
 
         <div className="mt-12 border-t border-gray-200 pt-8">
           <h2 className="text-2xl font-bold text-gray-900 mb-6">Additional Information</h2>

@@ -148,6 +148,19 @@ const UploadForm = ({ isOpen, onClose, type, onSuccess }) => {
         toast.success('Upload successful!', {
           id: loadingToast,
         });
+      }else{
+        formDataFile.append('name', formData.name);
+        const fileResponse = await fetch('/api/parts/upload', {
+          method: 'POST',
+          body: formDataFile,
+        });
+        if (!fileResponse.ok) {
+          throw new Error('Failed to upload file');
+        }
+        setSelectedFile(null);
+        toast.success('Upload successful!', {
+          id: loadingToast,
+        });
       }
 
       // Reset form after successful upload
@@ -183,7 +196,7 @@ const UploadForm = ({ isOpen, onClose, type, onSuccess }) => {
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Upload New {type === 'machine' ? 'Machine' : 'Instrument'}</h1>
+            <h1 className="text-2xl font-bold">Upload New {type === 'machine' ? 'Machine' : type==='parts' ? 'Part' : 'Instrument'}</h1>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-full"

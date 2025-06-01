@@ -33,13 +33,11 @@ export default async function handler(req, res) {
     const data = await s3.send(new ListObjectsV2Command({ Bucket: 'parts' }));
     const files = (data.Contents || []).map((item) => ({
       name: item.Key,
-      url: `${process.env.R2_ENDPOINT}/instruments/${item.Key}`,
-      size: item.Size,
-      lastModified: item.LastModified,
+      url: `${process.env.R2_ENDPOINT}/parts/${item.Key}`,
     }));
     res.status(200).json(files);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to list instruments' });
+    res.status(500).json({ error: 'Failed to list Parts' });
   }
 } 

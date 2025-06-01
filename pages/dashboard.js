@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('instruments');
   const [instruments, setInstruments] = useState([]);
   const [machines, setMachines] = useState([]);
+  const [parts,setParts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef(null);
@@ -31,6 +32,7 @@ export default function Dashboard() {
     }
     fetchInstruments();
     fetchMachines();
+    fetchParts();
   }, [user, router]);
 
   const fetchInstruments = async () => {
@@ -40,6 +42,17 @@ export default function Dashboard() {
     } catch (error) {
       console.error('Error fetching instruments:', error);
       toast.error('Failed to fetch instruments');
+    } finally {
+      setLoading(false);
+    }
+  };
+  const fetchParts = async () => {
+    try {
+      const data = await r2Service.listParts();
+      setParts(data);
+    } catch (error) {
+      console.error('Error fetching Parts:', error);
+      toast.error('Failed to fetch Parts');
     } finally {
       setLoading(false);
     }
@@ -55,48 +68,18 @@ export default function Dashboard() {
     }
   };
 
-  const handleFileUpload = async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    if (!validTypes.includes(file.type)) {
-      toast.error('Please upload a valid image file (JPEG, PNG, or GIF)');
-      return;
-    }
-
-    setUploading(true);
-    try {
-      if (activeTab === 'instruments') {
-        await r2Service.uploadInstrument(file);
-        toast.success('Instrument uploaded successfully');
-        fetchInstruments();
-      } else {
-        await r2Service.uploadMachine(file);
-        toast.success('Machine uploaded successfully');
-        fetchMachines();
-      }
-    } catch (error) {
-      console.error('Upload error:', error);
-      toast.error('Failed to upload file');
-    } finally {
-      setUploading(false);
-      // Reset file input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-    }
-  };
-
   const handleDelete = async (fileName) => {
-    if (!confirm(`Are you sure you want to delete this ${activeTab === 'instruments' ? 'instrument' : 'machine'}?`)) return;
+    if (!confirm(`Are you sure you want to delete this ${activeTab === 'instruments' ? 'instrument' : activeTab==='machine'? 'machine': 'part'}?`)) return;
 
     try {
       if (activeTab === 'instruments') {
         await r2Service.deleteInstrument(fileName);
         toast.success('Instrument deleted successfully');
         fetchInstruments();
+      }else if(activeTab==='parts'){
+        await r2Service.deletePart(fileName);
+        toast.success('Part deleted successfully');
+        fetchParts();
       } else {
         await r2Service.deleteMachine(fileName);
         toast.success('Machine deleted successfully');
@@ -119,7 +102,7 @@ export default function Dashboard() {
   };
 
   // New functions for search, filter, and pagination
-  const filteredItems = (activeTab === 'instruments' ? instruments : machines)
+  const filteredItems = (activeTab === 'instruments' ? instruments : activeTab==='parts'? parts : machines)
     .filter(item => {
       const searchTerm = searchQuery.toLowerCase();
       const itemName = (item.metadata?.['machine-name'] || item.name.replace(/\.[^/.]+$/, '')).toLowerCase();
@@ -199,6 +182,20 @@ export default function Dashboard() {
                 >
                   Machines
                 </button>
+                <button
+                  onClick={() => {
+                    setActiveTab('parts');
+                    setCurrentPage(1);
+                    setSearchQuery('');
+                  }}
+                  className={`${
+                    activeTab === 'parts'
+                      ? 'border-blue-600 text-blue-800'
+                      : 'border-transparent text-gray-500 hover:border-blue-300 hover:text-blue-700'
+                  } inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium transition-colors duration-200`}
+                >
+                  Parts
+                </button>
               </div>
             </div>
             <div className="flex items-center">
@@ -218,14 +215,14 @@ export default function Dashboard() {
           <div className="flex flex-col space-y-4 mb-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center space-y-4 sm:space-y-0">
               <h2 className="text-2xl font-semibold text-blue-800">
-                {activeTab === 'instruments' ? 'Medical Instruments' : 'Medical Machines'}
+                {activeTab === 'instruments' ? 'Medical Instruments' : activeTab==='parts'? 'Medical Parts' : 'Medical Machines'}
               </h2>
               <div className="flex items-center space-x-4">
                 <button
                   onClick={() => setIsUploadModalOpen(true)}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
                 >
-                  Upload New {activeTab === 'instruments' ? 'Instrument' : 'Machine'}
+                  Upload New {activeTab === 'instruments' ? 'Instrument' : activeTab==='parts'? 'Parts' : 'Machine'}
                 </button>
               </div>
             </div>
@@ -269,10 +266,12 @@ export default function Dashboard() {
           <UploadForm
             isOpen={isUploadModalOpen}
             onClose={() => setIsUploadModalOpen(false)}
-            type={activeTab === 'instruments' ? 'instrument' : 'machine'}
+            type={activeTab === 'instruments' ? 'instrument' : activeTab==='parts'?'part': 'machine'}
             onSuccess={() => {
               if (activeTab === 'instruments') {
                 fetchInstruments();
+              }else if(activeTab=='parts'){
+                fetchParts();
               } else {
                 fetchMachines();
               }
@@ -295,7 +294,7 @@ export default function Dashboard() {
               >
                 <div className="relative group">
                   <img
-                    src={(activeTab=='instruments'?"https://pub-bad3ff0b003e4cfa9d266bdf59521d9b.r2.dev/":"https://pub-4aaf0de1afcc494fb5f9a408ec4711b7.r2.dev/")+item.name}
+                    src={(activeTab=='instruments'?"https://pub-bad3ff0b003e4cfa9d266bdf59521d9b.r2.dev/":activeTab=='parts'?"https://pub-f431682a7c9f419e9dbc31ec037e5d34.r2.dev/":"https://pub-4aaf0de1afcc494fb5f9a408ec4711b7.r2.dev/")+item.name}
                     alt={item.metadata?.['machine-name'] || item.name.replace(/\.[^/.]+$/, '')}
                     className="w-full h-48 object-cover transition-transform duration-200 group-hover:scale-105"
                   />

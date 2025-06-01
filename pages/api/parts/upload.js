@@ -56,10 +56,10 @@ export default async function handler(req, res) {
 
     res.status(200).json({
       name: customFilename,
-      url: `${process.env.R2_ENDPOINT}/instruments/${customFilename}`,
+      url: `${process.env.R2_ENDPOINT}/parts/${customFilename}`,
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to upload instrument' });
+    res.status(500).json({ error: 'Failed to upload Part' });
   }
 }

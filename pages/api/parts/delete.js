@@ -27,9 +27,9 @@ export default async function handler(req, res) {
     });
 
     await s3.send(command);
-    res.status(200).json({ message: 'Instrument deleted successfully' });
+    res.status(200).json({ message: 'Part deleted successfully' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Failed to delete instrument' });
+    res.status(500).json({ error: 'Failed to delete Part' });
   }
 } 
