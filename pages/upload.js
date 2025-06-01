@@ -149,7 +149,9 @@ const UploadForm = ({ isOpen, onClose, type, onSuccess }) => {
           id: loadingToast,
         });
       }else{
-        formDataFile.append('name', formData.name);
+        const sanitizeFilename = (name) =>
+        name.toLowerCase().replace(/\.[^/.]+$/, '').replace(/\s+/g, '_');
+        formDataFile.append('name', sanitizeFilename(formData.name));
         const fileResponse = await fetch('/api/parts/upload', {
           method: 'POST',
           body: formDataFile,

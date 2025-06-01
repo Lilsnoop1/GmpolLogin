@@ -18,6 +18,14 @@ const s3 = new S3Client({
   },
 });
 
+// Helper function to sanitize filename
+const sanitizeFilename = (name) => {
+  return name
+    .toLowerCase()
+    .replace(/\.[^/.]+$/, '')     // Remove file extension
+    .replace(/\s+/g, '_');        // Replace spaces with underscores
+};
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -39,24 +47,31 @@ export default async function handler(req, res) {
 
     const fileContent = fs.readFileSync(file.filepath);
 
-    // Use name from form field if provided, else fallback to original filename
-    const customFilename = fields.name?.toString().trim() || file.originalFilename;
+    // Extract original file extension (e.g., jpg, pdf)
+    const originalExtension = file.originalFilename?.split('.').pop();
+
+    // Use provided name or fallback to original filename, and sanitize it
+    const rawName = fields.name?.toString().trim() || file.originalFilename;
+    const cleanedName = sanitizeFilename(rawName);
+
+    // Final filename: sanitized + extension
+    const finalFilename = originalExtension ? `${cleanedName}.${originalExtension}` : cleanedName;
 
     const command = new PutObjectCommand({
       Bucket: 'parts',
-      Key: customFilename,
+      Key: finalFilename,
       Body: fileContent,
       ContentType: file.mimetype,
     });
 
     await s3.send(command);
 
-    // Clean up the temporary file
+    // Clean up temp file
     fs.unlinkSync(file.filepath);
 
     res.status(200).json({
-      name: customFilename,
-      url: `${process.env.R2_ENDPOINT}/parts/${customFilename}`,
+      name: finalFilename,
+      url: `${process.env.R2_ENDPOINT}/parts/${finalFilename}`,
     });
   } catch (err) {
     console.error(err);
