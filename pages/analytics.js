@@ -46,16 +46,14 @@ export default function Analytics() {
     const fetchData = async () => {
       try {
         // Get current date and 30 days ago
-        const endAt = Math.floor(Date.now() / 1000);
-        const startAt = endAt - (30 * 24 * 60 * 60); // 30 days ago
+        const endAt = Math.floor(Date.now());
+        const startAt = endAt - (30 * 24 * 60 * 60 * 1000); // 30 days ago
 
         const [metricsRes, activeRes] = await Promise.all([
           api.get(`/websites/${process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}/stats`, {
             params: {
-              type: 'pageview',
               startAt,
               endAt,
-              unit: 'day'
             }
           }),
           api.get(`/websites/${process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}/active`)
@@ -103,41 +101,41 @@ export default function Analytics() {
               <div className="bg-blue-50 p-4 rounded-lg">
                 <p className="text-sm text-blue-600">Page Views</p>
                 <p className="text-2xl font-bold text-blue-700">
-                  {metrics?.data?.pageviews?.value || 0}
+                  {metrics?.pageviews?.value || 0}
                 </p>
                 <p className="text-xs text-blue-500">
                   {metrics?.data?.pageviews?.prev > metrics?.data?.pageviews?.value ? '↓' : '↑'} 
-                  {Math.abs(metrics?.data?.pageviews?.value - metrics?.data?.pageviews?.prev)} from previous
+                  {Math.abs(metrics?.pageviews?.value - metrics?.pageviews?.prev)} from previous
                 </p>
               </div>
               <div className="bg-green-50 p-4 rounded-lg">
                 <p className="text-sm text-green-600">Unique Visitors</p>
                 <p className="text-2xl font-bold text-green-700">
-                  {metrics?.data?.visitors?.value || 0}
+                  {metrics?.visitors?.value || 0}
                 </p>
                 <p className="text-xs text-green-500">
                   {metrics?.data?.visitors?.prev > metrics?.data?.visitors?.value ? '↓' : '↑'} 
-                  {Math.abs(metrics?.data?.visitors?.value - metrics?.data?.visitors?.prev)} from previous
+                  {Math.abs(metrics?.visitors?.value - metrics?.visitors?.prev)} from previous
                 </p>
               </div>
               <div className="bg-purple-50 p-4 rounded-lg">
                 <p className="text-sm text-purple-600">Total Visits</p>
                 <p className="text-2xl font-bold text-purple-700">
-                  {metrics?.data?.visits?.value || 0}
+                  {metrics?.visits?.value || 0}
                 </p>
                 <p className="text-xs text-purple-500">
                   {metrics?.data?.visits?.prev > metrics?.data?.visits?.value ? '↓' : '↑'} 
-                  {Math.abs(metrics?.data?.visits?.value - metrics?.data?.visits?.prev)} from previous
+                  {Math.abs(metrics?.visits?.value - metrics?.visits?.prev)} from previous
                 </p>
               </div>
               <div className="bg-yellow-50 p-4 rounded-lg">
                 <p className="text-sm text-yellow-600">Bounce Rate</p>
                 <p className="text-2xl font-bold text-yellow-700">
-                  {metrics?.data?.bounces?.value || 0}%
+                  {metrics?.bounces?.value || 0}%
                 </p>
                 <p className="text-xs text-yellow-500">
-                  {metrics?.data?.bounces?.prev > metrics?.data?.bounces?.value ? '↓' : '↑'} 
-                  {Math.abs(metrics?.data?.bounces?.value - metrics?.data?.bounces?.prev)}% from previous
+                  {metrics?.bounces?.prev > metrics?.bounces?.value ? '↓' : '↑'} 
+                  {Math.abs(metrics?.bounces?.value - metrics?.bounces?.prev)}% from previous
                 </p>
               </div>
             </div>
@@ -149,7 +147,7 @@ export default function Analytics() {
             <div className="flex items-center justify-center h-48">
               <div className="text-center">
                 <div className="text-5xl font-bold text-blue-600 mb-2">
-                  {active?.data?.visitors || 0}
+                  {active?.visitors || 0}
                 </div>
                 <p className="text-gray-600">Currently Active</p>
               </div>
@@ -162,7 +160,7 @@ export default function Analytics() {
             <div className="flex items-center justify-center h-48">
               <div className="text-center">
                 <div className="text-5xl font-bold text-indigo-600 mb-2">
-                  {Math.floor((metrics?.data?.totaltime?.value || 0) / 60)}m {Math.floor((metrics?.data?.totaltime?.value || 0) % 60)}s
+                  {Math.floor((metrics?.totaltime?.value || 0) / 60)}m {Math.floor((metrics?.totaltime?.value || 0) % 60)}s
                 </div>
                 <p className="text-gray-600">Average Session Duration</p>
               </div>
@@ -175,23 +173,23 @@ export default function Analytics() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Page Views Growth</span>
-                <span className={`font-semibold ${metrics?.data?.pageviews?.value > metrics?.data?.pageviews?.prev ? 'text-green-600' : 'text-red-600'}`}>
-                  {metrics?.data?.pageviews?.value > metrics?.data?.pageviews?.prev ? '↑' : '↓'} 
-                  {Math.abs(metrics?.data?.pageviews?.value - metrics?.data?.pageviews?.prev)}
+                <span className={`font-semibold ${metrics?.pageviews?.value > metrics?.pageviews?.prev ? 'text-green-600' : 'text-red-600'}`}>
+                  {metrics?.pageviews?.value > metrics?.pageviews?.prev ? '↑' : '↓'} 
+                  {Math.abs(metrics?.pageviews?.value - metrics?.pageviews?.prev)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Visitor Growth</span>
-                <span className={`font-semibold ${metrics?.data?.visitors?.value > metrics?.data?.visitors?.prev ? 'text-green-600' : 'text-red-600'}`}>
-                  {metrics?.data?.visitors?.value > metrics?.data?.visitors?.prev ? '↑' : '↓'} 
-                  {Math.abs(metrics?.data?.visitors?.value - metrics?.data?.visitors?.prev)}
+                <span className={`font-semibold ${metrics?.visitors?.value > metrics?.visitors?.prev ? 'text-green-600' : 'text-red-600'}`}>
+                  {metrics?.visitors?.value > metrics?.visitors?.prev ? '↑' : '↓'} 
+                  {Math.abs(metrics?.visitors?.value - metrics?.visitors?.prev)}
                 </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">Visit Growth</span>
-                <span className={`font-semibold ${metrics?.data?.visits?.value > metrics?.data?.visits?.prev ? 'text-green-600' : 'text-red-600'}`}>
-                  {metrics?.data?.visits?.value > metrics?.data?.visits?.prev ? '↑' : '↓'} 
-                  {Math.abs(metrics?.data?.visits?.value - metrics?.data?.visits?.prev)}
+                <span className={`font-semibold ${metrics?.visits?.value > metrics?.visits?.prev ? 'text-green-600' : 'text-red-600'}`}>
+                  {metrics?.visits?.value > metrics?.visits?.prev ? '↑' : '↓'} 
+                  {Math.abs(metrics?.visits?.value - metrics?.visits?.prev)}
                 </span>
               </div>
             </div>
