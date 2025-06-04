@@ -34,6 +34,8 @@ export default async function handler(req, res) {
     const files = (data.Contents || []).map((item) => ({
       name: item.Key,
       url: `${process.env.R2_ENDPOINT}/parts/${item.Key}`,
+      size: item.Size,
+      lastModified: item.LastModified,
     }));
     res.status(200).json(files);
   } catch (err) {

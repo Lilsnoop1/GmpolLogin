@@ -5,6 +5,7 @@ import { r2Service } from '../lib/r2Service';
 import toast from 'react-hot-toast';
 import UploadForm from './upload';
 import { SearchIcon, FilterIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('instruments');
@@ -196,6 +197,12 @@ export default function Dashboard() {
                 >
                   Parts
                 </button>
+                <Link
+                  href="/analytics"
+                  className="inline-flex items-center px-1 pt-1 border-b-2 border-transparent text-sm font-medium text-gray-500 hover:border-blue-300 hover:text-blue-700 transition-colors duration-200"
+                >
+                  Analytics
+                </Link>
               </div>
             </div>
             <div className="flex items-center">

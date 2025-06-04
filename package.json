@@ -11,6 +11,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.816.0",
     "axios": "^1.6.2",
+    "chart.js": "^4.4.9",
     "dotenv": "^16.5.0",
     "firebase": "^10.7.0",
     "firebase-admin": "^11.11.1",
@@ -19,6 +20,7 @@
     "next": "14.0.3",
     "next-auth": "^4.24.5",
     "react": "^18.2.0",
+    "react-chartjs-2": "^5.3.0",
     "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.1"
   },
