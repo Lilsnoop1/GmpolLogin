@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import UploadForm from './upload';
 import { SearchIcon, FilterIcon, ChevronLeftIcon, ChevronRightIcon } from 'lucide-react';
 import Link from 'next/link';
+import axios from 'axios';
 
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('instruments');
@@ -82,6 +83,22 @@ export default function Dashboard() {
         toast.success('Part deleted successfully');
         fetchParts();
       } else {
+        //write code here
+        const baseName = fileName.split('.').slice(0, -1).join('.');
+        const slug = encodeURIComponent(
+          baseName.trim().toLowerCase().replace(/\s+/g, '_')
+        );
+
+        const res = await fetch(`/api/machines/descriptions?slug=${slug}`, {
+          method: 'DELETE',
+        });
+
+        if (!res.ok) {
+          throw new Error('Failed to delete machine from database');
+        }
+
+        toast.success('Machine deleted successfully');
+        fetchMachines();
         await r2Service.deleteMachine(fileName);
         toast.success('Machine deleted successfully');
         fetchMachines();

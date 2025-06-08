@@ -17,7 +17,6 @@ const s3 = new S3Client({
     secretAccessKey: process.env.R2_SECRET_ACCESS_KEY,
   },
 });
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -40,13 +39,17 @@ export default async function handler(req, res) {
     const fileContent = fs.readFileSync(file.filepath);
 
     // Format the filename: lowercase and replace spaces with underscores
-    const sanitizedFilename = file.originalFilename
-      .toLowerCase()
-      .replace(/\s+/g, '_');
+    const originalExtension = file.originalFilename?.split('.').pop();
+    // Use provided name or fallback to original filename, and sanitize it
+    // const rawName = fields.name?.toString().trim() || file.originalFilename;
+    // const cleanedName = sanitizeFilename(rawName);
+
+    const finalFilename = originalExtension ? `${fields.name}.${originalExtension}` : fields.name;
+
 
     const command = new PutObjectCommand({
       Bucket: 'machines',
-      Key: sanitizedFilename,
+      Key: finalFilename,
       Body: fileContent,
       ContentType: file.mimetype,
     });
@@ -56,8 +59,8 @@ export default async function handler(req, res) {
     fs.unlinkSync(file.filepath);
 
     res.status(200).json({
-      name: sanitizedFilename,
-      url: `${process.env.R2_ENDPOINT}/machines/${sanitizedFilename}`,
+      name: fields.name,
+      url: `${process.env.R2_ENDPOINT}/machines/${fields.name}`,
     });
   } catch (err) {
     console.error(err);

@@ -107,6 +107,9 @@ const UploadForm = ({ isOpen, onClose, type, onSuccess }) => {
       formDataFile.append('file', selectedFile);
 
       if (type === 'machine') {
+        const sanitizeFilename = (name) =>
+  name.trim().toLowerCase().replace(/\.[^/.]+$/, '').replace(/\s+/g, '_');
+        formDataFile.append('name', sanitizeFilename(formData.name));
         const fileResponse = await fetch('/api/machines/upload', {
           method: 'POST',
           body: formDataFile,
@@ -114,7 +117,7 @@ const UploadForm = ({ isOpen, onClose, type, onSuccess }) => {
         if (!fileResponse.ok) {
           throw new Error('Failed to upload file');
         }
-        const { url } = await fileResponse.json();
+        const {url } = await fileResponse.json();
         // Then upload the description with the file URL
         const response = await fetch('/api/machines/descriptions', {
           method: 'POST',
