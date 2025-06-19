@@ -156,13 +156,13 @@ export default function Analytics() {
 
           {/* Time on Site Card */}
           <div className="bg-white p-6 rounded-xl shadow-lg border border-blue-100">
-            <h2 className="text-xl font-semibold mb-6 text-gray-800">Average Time on Site</h2>
+            <h2 className="text-xl font-semibold mb-6 text-gray-800">Total Time on Site</h2>
             <div className="flex items-center justify-center h-48">
               <div className="text-center">
                 <div className="text-5xl font-bold text-indigo-600 mb-2">
                   {Math.floor((metrics?.totaltime?.value || 0) / 60)}m {Math.floor((metrics?.totaltime?.value || 0) % 60)}s
                 </div>
-                <p className="text-gray-600">Average Session Duration</p>
+                <p className="text-gray-600">Total Session Duration</p>
               </div>
             </div>
           </div>
